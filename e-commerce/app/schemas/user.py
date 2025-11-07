@@ -26,15 +26,22 @@ class UserBase(BaseModel):
     if not name:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Name can't be empty.")
-    name=check_input_parameter(name)
-    if not 3 <= len(name) <= 100:
+    
+    # 去除首尾空格
+    name = name.strip()
+    
+    if not 1 <= len(name) <= 100:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Name should be between 3 and 100 characters in length.")
-    if not is_valid_namesurname(name):
+        detail="Name should be between 1 and 100 characters in length.")
+    
+    # 验证格式：支持中文、英文、空格、连字符、撇号
+    from app.utils.input_validator import is_valid_name
+    if not is_valid_name(name):
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Name should contain theses symbols -, &, _ , ' ")
+        detail="Name can only contain Chinese characters, letters, spaces, hyphens (-), and apostrophes (').")
+    
     return name
 
   @field_validator('surname', mode='before')
@@ -43,16 +50,22 @@ class UserBase(BaseModel):
     if not surname:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Surname can't be empty.")
-    surname=check_input_parameter(surname)
+    
+    # 去除首尾空格
+    surname = surname.strip()
 
     if not 1 <= len(surname) <= 100:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Surname should be between 1 and 100 characters in length.")
-    if not is_valid_namesurname(surname):
+    
+    # 验证格式：支持中文、英文、空格、连字符、撇号
+    from app.utils.input_validator import is_valid_name
+    if not is_valid_name(surname):
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Name should contain theses symbols -, &, _ , ' ")
+        detail="Surname can only contain Chinese characters, letters, spaces, hyphens (-), and apostrophes (').")
+    
     return surname
 
   @field_validator('username', mode='before')
@@ -61,11 +74,19 @@ class UserBase(BaseModel):
     if not username:
        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Empty username")
-    username=check_input_parameter(username)
+    
+    # 去除首尾空格
+    username = username.strip()
 
-    if not 3 <= len(username) <= 50:
+    if not 1 <= len(username) <= 16:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                          detail="Username should be between 3 and 50 characters in length.")
+                          detail="Username should be between 1 and 16 characters in length.")
+    
+    # 验证格式：中文、英文、数字、下划线
+    from app.utils.input_validator import is_valid_username
+    if not is_valid_username(username):
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                          detail="Username can only contain Chinese characters, letters, numbers, and underscores.")
 
     return username
 
@@ -147,15 +168,22 @@ class UserUpdate(BaseModel):
     if not name:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Name can't be empty.")
-    name=check_input_parameter(name)
-    if not 3 <= len(name) <= 100:
+    
+    # 去除首尾空格
+    name = name.strip()
+    
+    if not 1 <= len(name) <= 100:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Name should be between 3 and 100 characters in length.")
-    if not is_valid_namesurname(name):
+        detail="Name should be between 1 and 100 characters in length.")
+    
+    # 验证格式：支持中文、英文、空格、连字符、撇号
+    from app.utils.input_validator import is_valid_name
+    if not is_valid_name(name):
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Name should contain theses symbols -, &, _ , ' ")
+        detail="Name can only contain Chinese characters, letters, spaces, hyphens (-), and apostrophes (').")
+    
     return name
   
   @field_validator('email', mode='before')
@@ -184,16 +212,22 @@ class UserUpdate(BaseModel):
     if not surname:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Surname can't be empty.")
-    surname=check_input_parameter(surname)
+    
+    # 去除首尾空格
+    surname = surname.strip()
 
     if not 1 <= len(surname) <= 100:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Surname should be between 1 and 100 characters in length.")
-    if not is_valid_namesurname(surname):
+    
+    # 验证格式：支持中文、英文、空格、连字符、撇号
+    from app.utils.input_validator import is_valid_name
+    if not is_valid_name(surname):
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Surname should contain theses symbols -, &, _ , ' ")
+        detail="Surname can only contain Chinese characters, letters, spaces, hyphens (-), and apostrophes (').")
+    
     return surname
 
   @field_validator('username', mode='before')
@@ -202,11 +236,19 @@ class UserUpdate(BaseModel):
     if not username:
        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                           detail="Empty username")
-    username=check_input_parameter(username)
+    
+    # 去除首尾空格
+    username = username.strip()
 
-    if not 3 <= len(username) <= 50:
+    if not 1 <= len(username) <= 16:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                          detail="Username should be between 3 and 50 characters in length.")
+                          detail="Username should be between 1 and 16 characters in length.")
+    
+    # 验证格式：中文、英文、数字、下划线
+    from app.utils.input_validator import is_valid_username
+    if not is_valid_username(username):
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                          detail="Username can only contain Chinese characters, letters, numbers, and underscores.")
 
     return username
 

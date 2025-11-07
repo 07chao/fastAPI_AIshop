@@ -52,14 +52,7 @@ class UserService:
           status_code=status.HTTP_400_BAD_REQUEST,
           detail="Phone number is already registered")
 
-    if user_data.username is not None:
-      existing_user_result_username = await db.execute(select(User).filter(User.username == user_data.username))
-      existing_user_username = existing_user_result_username.scalar_one_or_none()
-
-      if existing_user_username:
-        raise HTTPException(
-          status_code=status.HTTP_400_BAD_REQUEST,
-          detail="Username is already registered")
+    # username 允许重复，不检查
 
     if current_user.role != Role.admin and current_user.id != user_id:
       raise HTTPException(

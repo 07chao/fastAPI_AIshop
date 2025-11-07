@@ -53,7 +53,7 @@ async def get_cart_item_by_id(
   except Exception as e:
     return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
 
-@router.patch('/{cart_item_id}')
+@router.patch('/{cart_item_id}', response_model=CartItemResponse)
 async def update_cart_item(
     cart_item_id: int,
     cart_item: CartItemUpdate,

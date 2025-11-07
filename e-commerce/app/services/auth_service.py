@@ -26,8 +26,6 @@ class AuthService:
     existing_user_result_phone_number = await db.execute(
       select(User).filter(User.phone_number == user_data.phone_number))
     existing_user_phone_number = existing_user_result_phone_number.scalar_one_or_none()
-    existing_user_result_username = await db.execute(select(User).filter(User.username == user_data.username))
-    existing_user_username = existing_user_result_username.scalar_one_or_none()
 
     if existing_user_email:
       raise HTTPException(
@@ -40,11 +38,7 @@ class AuthService:
         detail="Phone number is already registered",
       )
 
-    if existing_user_username:
-      raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Username is already registered",
-      )
+    # username 允许重复，不检查
 
     hashed_password = hash_password(user_data.password)
     user_data = {**user_data.model_dump(), "password": hashed_password, "created_at": datetime.now()}
