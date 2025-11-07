@@ -32,7 +32,7 @@ class UserService:
           current_user: User,
           user_data: UserUpdate,
           db: AsyncSession):
-
+    # TODO: 这里逻辑有点问题，如果不修改手机号邮箱等信息，会提示已经存在
     if user_data.email is not None:
       existing_user_result_email = await db.execute(select(User).filter(User.email == user_data.email))
       existing_user_email = existing_user_result_email.scalar_one_or_none()
@@ -106,8 +106,8 @@ class UserService:
         status_code=status.HTTP_404_NOT_FOUND,
         detail="User not found")
 
-    user.is_active = False
+    # 硬删除：真正从数据库中删除记录
+    await db.delete(user)
     await db.commit()
-    await db.refresh(user)
 
     return {"message": "User deleted successfully"}

@@ -263,7 +263,7 @@ const viewOrderDetail = (orderId: number) => {
 
 const handlePay = (orderId: number) => {
   ElMessage.info('支付功能开发中...')
-  // TODO: Implement payment
+  // TOD: Implement payment
 }
 
 const handleCancel = async (orderId: number) => {
@@ -292,12 +292,12 @@ const handleCancel = async (orderId: number) => {
 
 const handleConfirmReceipt = (orderId: number) => {
   ElMessage.info('确认收货功能开发中...')
-  // TODO: Implement confirm receipt
+  // TOD: Implement confirm receipt
 }
 
 const handleContact = (orderId: number) => {
   ElMessage.info('客服功能开发中...')
-  // TODO: Implement contact customer service
+  // TOD: Implement contact customer service
 }
 
 const handlePageChange = (page: number) => {

@@ -118,11 +118,8 @@ class ProductService:
         status_code=status.HTTP_403_FORBIDDEN,
         detail="You do not have permission to delete this product.")
 
-    product.is_active = False
-    product.stock = 0
-
-    db.add(product)
+    # 硬删除：真正从数据库中删除记录
+    await db.delete(product)
     await db.commit()
-    await db.refresh(product)
 
     return {"detail": "Product deleted successfully."}

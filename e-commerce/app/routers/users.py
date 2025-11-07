@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models import User
 from app.database.session import get_db
@@ -41,13 +41,12 @@ async def get_user_by_id(
 
 @router.put("/{user_id}", response_model=UserResponse, responses=user_responses)
 async def update_user(
-        request: Request,
         user_id: int,
         user_data: UserUpdate,
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)):
   try:
-    users = await UserService.update_user_in_db(request, user_id, current_user, user_data, db)
+    users = await UserService.update_user_in_db(user_id, current_user, user_data, db)
     return users
   except HTTPException as exc:
     return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)

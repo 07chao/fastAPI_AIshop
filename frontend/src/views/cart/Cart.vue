@@ -389,7 +389,7 @@ const handleCheckout = () => {
   }
   
   ElMessage.info('结算功能开发中...')
-  // TODO: Implement checkout
+  // TOD: Implement checkout
   // router.push('/checkout')
 }
 
