@@ -10,6 +10,7 @@ class Review(Base):
   id = Column(Integer, primary_key=True, index=True)
   user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
   product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+  parent_review_id = Column(Integer, ForeignKey("reviews.id"), nullable=True)  # 主评论ID，如果为NULL则是主评论，否则是追评
   content = Column(Text, nullable=False)
   rating = Column(Integer, nullable=False)
   likes_count = Column(Integer, nullable=False, default=0)
@@ -22,3 +23,5 @@ class Review(Base):
 
   user = relationship("User", back_populates="reviews")
   product = relationship("Product", back_populates="reviews")
+  # 自关联：主评论和追评的关系
+  parent_review = relationship("Review", remote_side=[id], backref="follow_up_reviews")

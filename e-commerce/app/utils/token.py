@@ -101,6 +101,26 @@ async def get_current_admin(
 
   return True
 
+async def get_current_vendor(
+        request: Request,
+        response: Response,
+        token: str = Depends(oauth2_scheme),
+        db: AsyncSession = Depends(get_db)):
+  """
+  验证当前用户是否为商家（vendor）
+  """
+  payload = await verify_access_token(request, response, token, db)
+  user_id = int(payload.get("sub"))
+  user = await db.execute(select(User).where(User.id == user_id))
+  user = user.scalars().first()
+
+  if not user or user.role != Role.vendor:
+    raise HTTPException(
+      status_code=status.HTTP_403_FORBIDDEN,
+      detail="Only vendors can perform this action")
+
+  return user
+
 def get_client_ip(request: Request):
   x_forwarded_for = request.headers.get("X-Forwarded-For")
 

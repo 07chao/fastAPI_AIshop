@@ -10,12 +10,12 @@ class Settings(BaseSettings):
   DEFAULT_DATABASE_URL: str
   SECRET_KEY: str
   ALGORITHM: str
-  SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY")
-  FROM_EMAIL: str
+  SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
+  FROM_EMAIL: str = os.getenv("FROM_EMAIL", "")
   ACCESS_TOKEN_EXPIRE_MINUTES: int
-  STRIPE_SECRET_KEY: str
-  STRIPE_PUBLIC_KEY: str
-  STRIPE_WEBHOOK_SECRET: str
+  STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "mock_key")
+  STRIPE_PUBLIC_KEY: str = os.getenv("STRIPE_PUBLIC_KEY", "mock_key")
+  STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "mock_secret")
   REFRESH_TOKEN_EXPIRE_DAYS: int
   REDIS_SESSION_URL: str
   REQUESTS_TIME_LIMIT: int

@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from app.models.base import Base
 from app.database.session import engine, initialize_db
 from app.routers.wishlists import router as wishlists_router
-from app.middleware.rate_limitter import AdvancedMiddleware
+# from app.middleware.rate_limitter import AdvancedMiddleware  # 速率限制已禁用
 from app.routers import (auth, users, products, orders, password_recovery,
                          admin, payments, order_item, reviews, cart_items)
 
@@ -50,4 +50,4 @@ app.include_router(order_item.router)
 app.include_router(payments.router)
 app.include_router(reviews.router)
 app.include_router(wishlists_router)
-app.add_middleware(AdvancedMiddleware)
+# app.add_middleware(AdvancedMiddleware)  # 速率限制已禁用

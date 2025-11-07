@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from fastapi import HTTPException, status
@@ -51,10 +51,20 @@ class ReviewUpdate(ReviewBase):
   pass
 
 class ReviewResponse(ReviewBase):
+  id: int
   product_id: Optional[int]
+  parent_review_id: Optional[int] = None  # 主评论ID，如果为NULL则是主评论
+  created_at: datetime
+  follow_up_reviews: Optional[List['ReviewResponse']] = None  # 追评列表
+
+  model_config = ConfigDict(from_attributes=True)
 
 class Review(ReviewBase):
   id: int
   created_at: datetime
+  parent_review_id: Optional[int] = None
 
   model_config = ConfigDict(from_attributes=True)
+
+# 解决前向引用
+ReviewResponse.model_rebuild()

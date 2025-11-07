@@ -50,19 +50,20 @@ async def create_review(
   except Exception as e:
     return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
 
-@router.put("/{review_id}", responses=review_put_response)
-async def update_review(
-        review_id:int,
-        review:ReviewCreate,
-        db:AsyncSession = Depends(get_db),
-        current_user = Depends(get_current_user)):
-  try:
-    review_result = await ReviewService.update_review(review_id, review, db, current_user)
-    return {"review": review_result}
-  except HTTPException as exc:
-    return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)
-  except Exception as e:
-    return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
+# 评论修改功能已禁用 - 不支持修改评论，只能删除后重新发表
+# @router.put("/{review_id}", responses=review_put_response)
+# async def update_review(
+#         review_id:int,
+#         review:ReviewCreate,
+#         db:AsyncSession = Depends(get_db),
+#         current_user = Depends(get_current_user)):
+#   try:
+#     review_result = await ReviewService.update_review(review_id, review, db, current_user)
+#     return {"review": review_result}
+#   except HTTPException as exc:
+#     return JSONResponse(content={"message": str(exc)}, status_code=exc.status_code)
+#   except Exception as e:
+#     return JSONResponse(content={"message": str(e)}, status_code=status.HTTP_400_BAD_REQUEST)
 
 @router.delete("/{review_id}", responses=review_delete_response)
 async def delete_review(
