@@ -24,74 +24,42 @@ class KnowledgeBaseService:
         Returns:
             List[Dict]: 商品信息列表，每个商品包含完整信息
         """
-        # 检查Product模型是否有category_id字段
-        has_category_id = hasattr(Product, 'category_id')
+        # 使用category_id关联Category表
+        query = await db.execute(
+            select(Product, Category)
+            .outerjoin(Category, Product.category_id == Category.id)
+            .where(Product.is_active == True)
+        )
+        results = query.all()
         
-        if has_category_id:
-            # 使用category_id关联Category表
-            query = await db.execute(
-                select(Product, Category)
-                .join(Category, Product.category_id == Category.id)
-                .where(Product.is_active == True)
-            )
-            results = query.all()
+        products_data = []
+        for product, category in results:
+            # 构建商品知识文档
+            category_name = category.name if category else "未分类"
+            category_level = category.level if category else 0
             
-            products_data = []
-            for product, category in results:
-                # 构建商品知识文档
-                product_doc = {
-                    "id": product.id,
-                    "type": "product",
-                    "name": product.name,
-                    "description": product.description or "",
-                    "price": product.price,
-                    "stock": product.stock,
-                    "category": category.name,
-                    "category_level": category.level,
-                    "view_count": product.view_count,
-                    "created_at": str(product.created_at),
-                    # 构建完整的文本内容用于Embedding
-                    "text": f"""
+            product_doc = {
+                "id": product.id,
+                "type": "product",
+                "name": product.name,
+                "description": product.description or "",
+                "price": product.price,
+                "stock": product.stock,
+                "category": category_name,
+                "category_level": category_level,
+                "view_count": product.view_count,
+                "created_at": str(product.created_at),
+                # 构建完整的文本内容用于Embedding
+                "text": f"""
 商品名称：{product.name}
 商品描述：{product.description or '无描述'}
 价格：{product.price}元
-分类：{category.name}
+分类：{category_name}
 库存：{product.stock}
 浏览量：{product.view_count}
 """.strip()
-                }
-                products_data.append(product_doc)
-        else:
-            # 使用旧的category枚举字段
-            query = await db.execute(
-                select(Product).where(Product.is_active == True)
-            )
-            results = query.scalars().all()
-            
-            products_data = []
-            for product in results:
-                # 构建商品知识文档
-                product_doc = {
-                    "id": product.id,
-                    "type": "product",
-                    "name": product.name,
-                    "description": product.description or "",
-                    "price": product.price,
-                    "stock": product.stock,
-                    "category": product.category.value if hasattr(product.category, 'value') else str(product.category),
-                    "view_count": product.view_count,
-                    "created_at": str(product.created_at),
-                    # 构建完整的文本内容用于Embedding
-                    "text": f"""
-商品名称：{product.name}
-商品描述：{product.description or '无描述'}
-价格：{product.price}元
-分类：{product.category.value if hasattr(product.category, 'value') else str(product.category)}
-库存：{product.stock}
-浏览量：{product.view_count}
-""".strip()
-                }
-                products_data.append(product_doc)
+            }
+            products_data.append(product_doc)
         
         return products_data
     

@@ -8,9 +8,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database.session import get_db
 from app.utils.token import get_current_admin
-from app.services.vector_store_service import VectorStoreService
-from init_knowledge_base import init_knowledge_base
 import asyncio
+
+# 可选导入
+try:
+    from app.services.vector_store_service import VectorStoreService
+    from init_knowledge_base import init_knowledge_base
+    KNOWLEDGE_BASE_AVAILABLE = True
+except ImportError as e:
+    KNOWLEDGE_BASE_AVAILABLE = False
+    KNOWLEDGE_BASE_ERROR = str(e)
+    VectorStoreService = None
 
 
 router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
@@ -21,6 +29,15 @@ async def get_knowledge_base_status():
     """
     获取知识库状态
     """
+    if not KNOWLEDGE_BASE_AVAILABLE:
+        return JSONResponse(
+            content={
+                "status": "unavailable",
+                "message": f"知识库功能不可用: {KNOWLEDGE_BASE_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"
+            },
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         vector_store = VectorStoreService()
         info = vector_store.get_collection_info()
@@ -45,6 +62,12 @@ async def rebuild_knowledge_base(
     重建知识库（仅管理员）
     删除旧数据并重新构建
     """
+    if not KNOWLEDGE_BASE_AVAILABLE:
+        return JSONResponse(
+            content={"message": f"知识库功能不可用: {KNOWLEDGE_BASE_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         # 在后台任务中执行（避免阻塞）
         asyncio.create_task(init_knowledge_base(rebuild=True))
@@ -67,6 +90,12 @@ async def update_knowledge_base(
     增量更新知识库（仅管理员）
     只添加新的商品和评论
     """
+    if not KNOWLEDGE_BASE_AVAILABLE:
+        return JSONResponse(
+            content={"message": f"知识库功能不可用: {KNOWLEDGE_BASE_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         # 在后台任务中执行
         asyncio.create_task(init_knowledge_base(rebuild=False))

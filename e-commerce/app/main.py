@@ -58,9 +58,6 @@ app.include_router(categories.router)
 from app.routers import uploads
 app.include_router(uploads.router)
 
-# 导入Agent路由
-from app.routers import agent
-app.include_router(agent.router)
 
 # 导入知识库管理路由
 from app.routers import knowledge_base
@@ -68,5 +65,19 @@ app.include_router(knowledge_base.router)
 
 # 静态文件服务（用于访问上传的文件）
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# 导入Agent路由（可选功能，依赖未安装时会返回友好错误）
+try:
+    from app.routers import agent
+    app.include_router(agent.router)
+except ImportError:
+    pass  # Agent功能不可用时静默跳过
+
+# 导入知识库管理路由（可选功能）
+try:
+    from app.routers import knowledge_base
+    app.include_router(knowledge_base.router)
+except ImportError:
+    pass  # 知识库功能不可用时静默跳过
 
 # app.add_middleware(AdvancedMiddleware)  # 速率限制已禁用
