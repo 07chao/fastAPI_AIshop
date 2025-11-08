@@ -50,4 +50,19 @@ app.include_router(order_item.router)
 app.include_router(payments.router)
 app.include_router(reviews.router)
 app.include_router(wishlists_router)
+
+# 导入Agent路由（可选功能，依赖未安装时会返回友好错误）
+try:
+    from app.routers import agent
+    app.include_router(agent.router)
+except ImportError:
+    pass  # Agent功能不可用时静默跳过
+
+# 导入知识库管理路由（可选功能）
+try:
+    from app.routers import knowledge_base
+    app.include_router(knowledge_base.router)
+except ImportError:
+    pass  # 知识库功能不可用时静默跳过
+
 # app.add_middleware(AdvancedMiddleware)  # 速率限制已禁用

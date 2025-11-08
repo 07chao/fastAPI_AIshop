@@ -24,5 +24,6 @@ class Settings(BaseSettings):
   # model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
   class Config:
     env_file = ".env"
+    extra = "ignore"  # 忽略额外的环境变量，避免验证错误
 
 settings = Settings()

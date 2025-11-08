@@ -1,15 +1,7 @@
-import enum
-from sqlalchemy import Column, Integer, String, Float, Text, TIMESTAMP, Boolean, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Text, TIMESTAMP, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.models.base import Base
-
-
-class CategoryEnum(str, enum.Enum):
-  electronics = "electronics"
-  fashion = "fashion"
-  home = "home"
-  books = "books"
 
 
 class Product(Base):
@@ -20,7 +12,7 @@ class Product(Base):
   description = Column(Text, nullable=True)
   price = Column(Float, nullable=False)
   stock = Column(Integer, nullable=False)
-  category = Column(Enum(CategoryEnum), nullable=False)
+  category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
   vendor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
   created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
   updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now(), nullable=False)
@@ -28,6 +20,9 @@ class Product(Base):
   image_url = Column(String, nullable=True)
   view_count = Column(Integer, default=0)
 
+  # 与Category的关系
+  category_obj = relationship("Category", back_populates="products")
+  
   order_items = relationship("OrderItem", back_populates="product", cascade="all, delete-orphan")
   cart_items = relationship("CartItem", back_populates="product", cascade="all, delete-orphan")
   reviews = relationship("Review", back_populates="product", cascade="all, delete-orphan")

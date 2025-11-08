@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.wishlist import Wishlist
 from app.schemas.product import ProductFilter
 from app.schemas.wishlist import WishlistFilter
-from app.models.product import Product, CategoryEnum
+from app.models.product import Product
 
 async def apply_filters(db: AsyncSession, filters: ProductFilter):
     # Validate price range
@@ -17,14 +17,17 @@ async def apply_filters(db: AsyncSession, filters: ProductFilter):
                 detail="min_price cannot be greater than max_price."
             )
 
-    # Validate category
-    valid_categories = set(CategoryEnum.__members__)
-    if filters.category and filters.category not in valid_categories:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid category: {filters.category}. "
-                   f"Valid categories are: {', '.join(valid_categories)}."
-        )
+    # Validate category_id (if provided, check if it's a positive integer)
+    if filters.category is not None:
+        try:
+            category_id = int(filters.category)
+            if category_id < 1:
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid category: {filters.category}. Category must be a positive integer (category ID)."
+            )
 
     # Build dynamic conditions
     conditions = []
@@ -34,7 +37,7 @@ async def apply_filters(db: AsyncSession, filters: ProductFilter):
         conditions.append(Product.is_active == filters.availability)
 
     if filters.category is not None:
-        conditions.append(Product.category == filters.category)
+        conditions.append(Product.category_id == int(filters.category))
 
     if filters.min_price is not None:
         conditions.append(Product.price >= filters.min_price)
@@ -89,7 +92,14 @@ async def apply_wishlist_filters(filters: WishlistFilter, current_user):
     conditions.append(Product.is_active == filters.availability)
 
   if filters.category:
-    conditions.append(Product.category == filters.category)
+    try:
+      category_id = int(filters.category)
+      conditions.append(Product.category_id == category_id)
+    except (ValueError, TypeError):
+      raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=f"Invalid category: {filters.category}. Category must be a category ID."
+      )
 
   if filters.min_price:
     conditions.append(Product.price >= filters.min_price)

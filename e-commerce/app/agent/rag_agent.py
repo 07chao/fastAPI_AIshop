@@ -5,8 +5,15 @@ RAG Agent实现
 from typing import Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.config.settings import settings
-from app.services.vector_store_service import VectorStoreService
+
+# 可选导入，如果依赖未安装则提供友好错误
+try:
+    from app.services.vector_store_service import VectorStoreService
+    VECTOR_STORE_AVAILABLE = True
+except ImportError:
+    VECTOR_STORE_AVAILABLE = False
+    VectorStoreService = None
+
 from app.services.product_service import ProductService
 from app.services.cart_item_service import CartService
 from app.services.review_service import ReviewService
@@ -17,6 +24,15 @@ from app.schemas.cart_item import CartItemCreate
 import json
 import httpx
 
+# 尝试导入settings，如果Deepseek配置不存在则使用默认值
+try:
+    from app.config.settings import settings
+    DEEPSEEK_API_KEY = getattr(settings, 'DEEPSEEK_API_KEY', '') if hasattr(settings, 'DEEPSEEK_API_KEY') else ''
+    DEEPSEEK_API_BASE = getattr(settings, 'DEEPSEEK_API_BASE', 'https://api.deepseek.com/v1') if hasattr(settings, 'DEEPSEEK_API_BASE') else 'https://api.deepseek.com/v1'
+except:
+    DEEPSEEK_API_KEY = ''
+    DEEPSEEK_API_BASE = 'https://api.deepseek.com/v1'
+
 
 class RAGAgent:
     """
@@ -26,9 +42,14 @@ class RAGAgent:
     
     def __init__(self):
         """初始化Agent"""
+        if not VECTOR_STORE_AVAILABLE:
+            raise ImportError(
+                "VectorStoreService is not available. Please install dependencies: "
+                "pip install chromadb sentence-transformers"
+            )
         self.vector_store = VectorStoreService()
-        self.api_key = settings.DEEPSEEK_API_KEY if hasattr(settings, 'DEEPSEEK_API_KEY') else ""
-        self.api_base = settings.DEEPSEEK_API_BASE if hasattr(settings, 'DEEPSEEK_API_BASE') else "https://api.deepseek.com/v1"
+        self.api_key = DEEPSEEK_API_KEY
+        self.api_base = DEEPSEEK_API_BASE
     
     async def chat(
         self,

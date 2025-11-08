@@ -10,8 +10,15 @@ from typing import Optional, List
 
 from app.database.session import get_db
 from app.utils.token import get_current_user
-from app.agent.rag_agent import RAGAgent
 from app.models.user import User
+
+# 可选导入RAGAgent
+try:
+    from app.agent.rag_agent import RAGAgent
+    RAG_AGENT_AVAILABLE = True
+except ImportError as e:
+    RAG_AGENT_AVAILABLE = False
+    RAG_AGENT_ERROR = str(e)
 
 
 router = APIRouter(prefix="/agent", tags=["AI Agent"])
@@ -38,6 +45,12 @@ async def chat_with_agent(
     与AI Agent对话
     支持自然语言查询，Agent会智能推荐商品
     """
+    if not RAG_AGENT_AVAILABLE:
+        return JSONResponse(
+            content={"message": f"Agent功能不可用: {RAG_AGENT_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         agent = RAGAgent()
         result = await agent.chat(
@@ -64,6 +77,12 @@ async def recommend_products(
     """
     获取商品推荐
     """
+    if not RAG_AGENT_AVAILABLE:
+        return JSONResponse(
+            content={"message": f"Agent功能不可用: {RAG_AGENT_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         agent = RAGAgent()
         result = await agent.chat(
@@ -92,6 +111,12 @@ async def agent_add_to_cart(
     """
     Agent自动添加到购物车
     """
+    if not RAG_AGENT_AVAILABLE:
+        return JSONResponse(
+            content={"message": f"Agent功能不可用: {RAG_AGENT_ERROR}. 请安装依赖: pip install chromadb sentence-transformers"},
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
     try:
         agent = RAGAgent()
         result = await agent.add_to_cart(

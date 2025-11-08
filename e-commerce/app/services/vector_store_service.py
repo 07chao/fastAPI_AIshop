@@ -2,11 +2,27 @@
 向量数据库服务
 使用ChromaDB存储和检索向量
 """
-import chromadb
-from chromadb.config import Settings
 from typing import List, Dict, Optional
 import os
-from app.services.embedding_service import EmbeddingService
+
+# 可选导入chromadb，如果未安装则提供友好的错误提示
+try:
+    import chromadb
+    from chromadb.config import Settings
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    CHROMADB_AVAILABLE = False
+    chromadb = None
+    Settings = None
+
+try:
+    from app.services.embedding_service import EmbeddingService
+    EMBEDDING_AVAILABLE = True
+    EMBEDDING_ERROR = None
+except (ImportError, OSError) as e:
+    EMBEDDING_AVAILABLE = False
+    EMBEDDING_ERROR = str(e)
+    EmbeddingService = None
 
 
 class VectorStoreService:
@@ -23,12 +39,38 @@ class VectorStoreService:
             persist_directory: 持久化目录
             collection_name: 集合名称
         """
+        if not CHROMADB_AVAILABLE:
+            raise ImportError(
+                "chromadb is not installed. Please install it with: pip install chromadb"
+            )
+        if not EMBEDDING_AVAILABLE:
+            error_msg = EMBEDDING_ERROR if EMBEDDING_ERROR else 'Unknown error (可能是PyTorch DLL加载失败)'
+            raise ImportError(
+                f"EmbeddingService is not available: {error_msg}. "
+                "Please install sentence-transformers and PyTorch: "
+                "pip install sentence-transformers torch"
+            )
+        
         self.persist_directory = persist_directory
         self.collection_name = collection_name
         self.client = None
         self.collection = None
-        self.embedding_service = EmbeddingService()
+        # 延迟加载EmbeddingService，避免在导入时就加载PyTorch
+        self._embedding_service = None
         self._initialize_client()
+    
+    @property
+    def embedding_service(self):
+        """延迟加载EmbeddingService"""
+        if self._embedding_service is None:
+            try:
+                self._embedding_service = EmbeddingService()
+            except (ImportError, RuntimeError, OSError) as e:
+                raise ImportError(
+                    f"无法初始化EmbeddingService: {e}. "
+                    "请检查sentence-transformers和PyTorch是否正确安装。"
+                )
+        return self._embedding_service
     
     def _initialize_client(self):
         """初始化ChromaDB客户端"""
