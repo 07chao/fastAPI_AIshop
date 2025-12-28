@@ -69,7 +69,16 @@ class RAGAgent:
             Dict: 包含回复和推荐商品
         """
         # 1. 使用向量搜索查找相关商品
-        search_results = self.vector_store.search(user_query, n_results=10)
+        try:
+            search_results = self.vector_store.search(user_query, n_results=10)
+        except ValueError as e:
+            # 向量数据库为空或损坏
+            return {
+                "response": f"抱歉，知识库尚未初始化。{str(e)}",
+                "recommended_products": [],
+                "total_found": 0,
+                "error": str(e)
+            }
         
         # 2. 获取商品详细信息
         product_ids = [int(r["metadata"].get("product_id", r["id"])) for r in search_results if r["metadata"].get("type") == "product"]

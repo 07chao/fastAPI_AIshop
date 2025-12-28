@@ -54,6 +54,13 @@ def search_products_by_semantic(query: str, n_results: int = 10) -> str:
         
         import json
         return json.dumps(formatted, ensure_ascii=False, indent=2)
+    except ValueError as e:
+        # 向量数据库为空或损坏
+        import json
+        return json.dumps({
+            "error": str(e),
+            "message": "向量数据库未初始化或已损坏，请运行初始化脚本"
+        }, ensure_ascii=False, indent=2)
     except Exception as e:
         return f"搜索失败: {str(e)}"
 

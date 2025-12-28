@@ -71,8 +71,8 @@ class AuthService:
       if not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user")
 
-      if not user.is_verified:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+      # if not user.is_verified:
+      #   raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
       token_data = {"role": user.role}
       access_token = create_access_token(token_data, user_id=user.id)

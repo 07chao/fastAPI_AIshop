@@ -15,7 +15,7 @@ from app.routers import (auth, users, products, orders, password_recovery,
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await initialize_db()
+    await initialize_db()          
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield

@@ -198,6 +198,39 @@ class ProductService:
     except Exception:
       # 缓存获取失败，继续执行数据库查询
       pass
+
+  @staticmethod
+  async def update_product_rating_stats(db: AsyncSession, product_id: int):
+    """
+    计算并更新指定商品的平均评分和评价总数。
+    这是一个关键的内部方法，在创建、更新或删除评价时被调用。
+
+    Args:
+        db (AsyncSession): 数据库会话。
+        product_id (int): 需要更新的商品ID。
+    """
+    from app.models.review import Review
+
+    # 查询该商品的所有评价的评分
+    stmt = select(Review.rating).where(Review.product_id == product_id)
+    result = await db.execute(stmt)
+    ratings = result.scalars().all()
+
+    # 计算新的平均分和评价总数
+    if ratings:
+        new_review_count = len(ratings)
+        new_average_rating = sum(ratings) / new_review_count
+    else:
+        new_review_count = 0
+        new_average_rating = 0.0
+
+    # 获取商品对象并更新统计数据
+    product = await db.get(Product, product_id)
+    if product:
+        product.review_count = new_review_count
+        product.average_rating = round(new_average_rating, 2)  # 保留两位小数
+        await db.commit()
+        await db.refresh(product)
     
     # 使用 ILIKE 进行不区分大小写的模糊搜索（PostgreSQL）
     # 搜索商品名称和描述

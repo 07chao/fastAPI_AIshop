@@ -72,6 +72,8 @@ export interface Product {
   view_count: number
   created_at: string
   updated_at: string
+  average_rating: number // 新增：商品平均评分
+  review_count: number // 新增：商品评价总数
 }
 
 export interface ProductCreate {
@@ -91,6 +93,24 @@ export interface ProductFilter {
   max_price?: number
   availability?: boolean
 }
+
+// Review Types
+export interface Review {
+  id: number
+  product_id: number
+  parent_review_id?: number
+  content: string
+  rating: number
+  created_at: string
+  follow_up_reviews?: Review[]
+}
+
+export interface ReviewCreate {
+  product_id: number
+  content: string
+  rating: number
+}
+
 
 // Cart Types
 export interface CartItem {

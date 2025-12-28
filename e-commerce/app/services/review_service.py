@@ -157,6 +157,12 @@ class ReviewService:
     await db.commit()
     await db.refresh(review_db)
 
+    # --- 关键步骤：更新商品的评分统计 ---
+    # 只有在创建主评论时才触发更新
+    if not existing_review:
+        from app.services.product_service import ProductService
+        await ProductService.update_product_rating_stats(db, review_db.product_id)
+
     # 手动构建 ReviewResponse，避免访问关系属性导致的异步加载问题
     return ReviewResponse(
       id=review_db.id,

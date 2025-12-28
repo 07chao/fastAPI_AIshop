@@ -16,7 +16,7 @@ class UserBase(BaseModel):
   name: str = Field(..., json_schema_extra={"description": "The name of the user"})
   surname: str = Field(..., json_schema_extra={"description": "The surname of the user"})
   email: str
-  image_url: str = None
+  image_url: Optional[str] = None
 
   model_config = ConfigDict(from_attributes=True)
 

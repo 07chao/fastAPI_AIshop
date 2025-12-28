@@ -144,6 +144,19 @@ class VectorStoreService:
         
         print(f"成功添加 {len(documents)} 个文档到向量数据库")
     
+    def is_collection_empty(self) -> bool:
+        """
+        检查集合是否为空
+        
+        Returns:
+            bool: 如果集合为空或不存在返回True
+        """
+        try:
+            count = self.collection.count()
+            return count == 0
+        except Exception:
+            return True
+    
     def search(self, query: str, n_results: int = 10, filter_dict: Optional[Dict] = None) -> List[Dict]:
         """
         语义搜索
@@ -155,29 +168,49 @@ class VectorStoreService:
         
         Returns:
             List[Dict]: 搜索结果列表
+        
+        Raises:
+            ValueError: 如果集合为空或损坏
         """
-        # 生成查询向量
-        query_embedding = self.embedding_service.encode_single(query)
+        # 检查集合是否为空
+        if self.is_collection_empty():
+            raise ValueError(
+                "向量数据库集合为空。请先运行初始化脚本: "
+                "python -m e-commerce.init_knowledge_base"
+            )
         
-        # 执行搜索
-        results = self.collection.query(
-            query_embeddings=[query_embedding.tolist()],
-            n_results=n_results,
-            where=filter_dict
-        )
-        
-        # 格式化结果
-        formatted_results = []
-        if results["ids"] and len(results["ids"][0]) > 0:
-            for i in range(len(results["ids"][0])):
-                formatted_results.append({
-                    "id": results["ids"][0][i],
-                    "text": results["documents"][0][i],
-                    "metadata": results["metadatas"][0][i],
-                    "distance": results["distances"][0][i] if "distances" in results else None
-                })
-        
-        return formatted_results
+        try:
+            # 生成查询向量
+            query_embedding = self.embedding_service.encode_single(query)
+            
+            # 执行搜索
+            results = self.collection.query(
+                query_embeddings=[query_embedding.tolist()],
+                n_results=n_results,
+                where=filter_dict
+            )
+            
+            # 格式化结果
+            formatted_results = []
+            if results["ids"] and len(results["ids"][0]) > 0:
+                for i in range(len(results["ids"][0])):
+                    formatted_results.append({
+                        "id": results["ids"][0][i],
+                        "text": results["documents"][0][i],
+                        "metadata": results["metadatas"][0][i],
+                        "distance": results["distances"][0][i] if "distances" in results else None
+                    })
+            
+            return formatted_results
+        except Exception as e:
+            error_msg = str(e)
+            # 检查是否是HNSW索引错误
+            if "hnsw" in error_msg.lower() or "segment reader" in error_msg.lower() or "nothing found on disk" in error_msg.lower():
+                raise ValueError(
+                    "向量数据库索引损坏或数据不完整。请重新初始化知识库: "
+                    "python -m e-commerce.init_knowledge_base --rebuild"
+                ) from e
+            raise
     
     def delete_collection(self):
         """删除集合（用于重建）"""

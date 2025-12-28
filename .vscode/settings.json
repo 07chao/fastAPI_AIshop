@@ -1,0 +1,5 @@
+{
+    "window.zoomLevel": 1.1, // 整体缩放（包括聊天）
+    "editor.fontSize": 16, // 代码编辑区字体
+    "chat.fontSize": 16 // 有些版本的 TRAE 支持单独聊天字体
+}

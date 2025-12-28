@@ -8,7 +8,7 @@ from app.services.knowledge_base_service import KnowledgeBaseService
 from app.services.vector_store_service import VectorStoreService
 
 
-async def init_knowledge_base(rebuild: bool = False):
+async def init_knowledge_base(rebuild: bool = True):
     """
     初始化知识库
     

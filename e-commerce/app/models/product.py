@@ -19,6 +19,9 @@ class Product(Base):
   is_active = Column(Boolean, nullable=False)
   image_url = Column(String, nullable=True)
   view_count = Column(Integer, default=0)
+  # 新增字段：平均评分和评价总数，用于优化性能
+  average_rating = Column(Float, nullable=False, default=0.0, comment="商品平均评分")
+  review_count = Column(Integer, nullable=False, default=0, comment="商品评价总数")
 
   # 与Category的关系
   category_obj = relationship("Category", back_populates="products")

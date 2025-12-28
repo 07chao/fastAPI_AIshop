@@ -60,6 +60,9 @@ class ProductResponse(ProductBase):
   id: int
   created_at: datetime
   updated_at: Optional[datetime] = None
+  # 新增字段，用于在API响应中返回商品的评分信息
+  average_rating: float = Field(0.0, description="商品平均评分")
+  review_count: int = Field(0, description="商品评价总数")
 
   model_config = ConfigDict(from_attributes=True)
 
